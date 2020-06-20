@@ -86,12 +86,60 @@ class OurNeuralNetwork2:
           Elements in all_y_trues correspond to those in data
         '''
         learn_rate = 0.1
-        epochs = 1000           #Number of times looping through dataset
+        epochs = 1000           # Number of times looping through dataset
 
         for epoch in range(epochs):
             for x, y_true in zip(data, all_y_trues):
                 # --- Do a feedforward for later usage
-                
+                sum_h1 = self.w1 * x[0] + self.w2 * x[1] + self.b1
+                h1 = sigmoid(sum_h1)
+                sum_h2 = self.w3 * x[0] + self.w4 * x[1] + self.b2
+                h2 = sigmoid(sum_h2)
+                sum_o1 = self.w5 * h1 + self.w6 * h2 + self.b3
+                o1 = sigmoid(sum_o1)
+                y_pred = o1
+
+                # --- Calc partial deris
+                dL_dypred = -2 * (y_true - y_pred)
+
+                # Neuron o1
+                dypred_dw5 = h1 * deriv_sigmoid(sum_o1)
+                dypred_dw6 = h2 * deriv_sigmoid(sum_o1)
+                dypred_db3 = deriv_sigmoid(sum_o1)
+                dypred_dh1 = self.w5 * deriv_sigmoid(sum_o1)
+                dypred_dh2 = self.w6 * deriv_sigmoid(sum_o1)
+
+                # Neuron h1
+                dh1_dw1 = x[0] * deriv_sigmoid(sum_h1)
+                dh1_dw2 = x[1] * deriv_sigmoid(sum_h1)
+                dh1_db1 = deriv_sigmoid(sum_h1)
+
+                # Neuron h2
+                dh2_dw3 = x[0] * deriv_sigmoid(sum_h2)
+                dh2_dw4 = x[1] * deriv_sigmoid(sum_h2)
+                dh2_db2 = deriv_sigmoid(sum_h2)
+
+                # --- Update weights and Biases
+                # Neuron h1
+                self.w1 -= learn_rate * dL_dypred * dypred_dh1 * dh1_dw1
+                self.w2 -= learn_rate * dL_dypred * dypred_dh1 * dh1_dw2
+                self.b1 -= learn_rate * dL_dypred * dypred_dh1 * dh1_db1
+
+                # Neuron h2
+                self.w3 -= learn_rate * dL_dypred * dypred_dh2 * dh2_dw3
+                self.w4 -= learn_rate * dL_dypred * dypred_dh2 * dh2_dw4
+                self.b2 -= learn_rate * dL_dypred * dypred_dh2 * dh2_db2
+
+                # Neuron o1
+                self.w5 -= learn_rate * dL_dypred* dypred_dw5
+                self.w6 -= learn_rate * dL_dypred * dypred_dw6
+                self.b3 -= learn_rate * dL_dypred * dypred_db3
+
+            # --- Calculate total loss for the epochs
+            if epoch % 10 == 0:
+                y_preds = np.apply_along_axis(self.feedforward, 1, data)
+                loss = mse_loss(all_y_trues, y_preds)
+                print("Epoch %d loss: %.3f" % (epoch, loss))
 
 weights = np.array([0,1])       # w1 = 0, w2 = 1
 bias = 4                        # b = 4
@@ -107,3 +155,30 @@ print(network.feedforward(x))   # Output ~0.7216
 y_true = np.array([1,0,0,1])
 y_pred = np.array([0,0,0,0])
 print(mse_loss(y_true, y_pred)) # Output 0.5
+
+#Define dataset
+data = np.array([
+    [-2, -1],   #Alice
+    [25, 6],    #Bob
+    [17, 4],    #Charlie
+    [-15, -6],  #Diana
+])
+all_y_trues = np.array([
+    1,      #Alice
+    0,      #Bob
+    0,      #Charlie
+    1,      #Diana
+])
+
+#Train OurNeuralNetwork2
+print("\n\n\n")
+network = OurNeuralNetwork2()
+network.train(data, all_y_trues)
+
+# Make some predictions
+emily = np.array([-7, -3]) # 128 pounds, 63 inches
+frank = np.array([20, 2])  # 155 pounds, 68 inches
+me = np.array([50, 12])    # 185 lbs, 6' = 72"
+print("Emily: %.3f" % network.feedforward(emily)) # 0.951 - F
+print("Frank: %.3f" % network.feedforward(frank)) # 0.039 - M
+print("Me: %.3f" % network.feedforward(me))       #
