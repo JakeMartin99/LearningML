@@ -2,6 +2,7 @@
 import numpy as np
 from numpy.random import randn
 from data import train_data, test_data
+import random
 
 def createInputs(text):
     '''
@@ -131,7 +132,7 @@ def processData(data, backprop=True):
             # Backward
             rnn.backprop(dL_dy)
 
-        return loss / len(data), num_correct / len(data)
+    return loss / len(data), num_correct / len(data)
 
 # Create the vocabulary
 vocab = list(set([w for text in train_data.keys() for w in text.split(' ')]))
@@ -141,8 +142,8 @@ print('%d unique words found' % vocab_size)
 # Assign indices to each words
 word_to_idx = { w: i for i, w in enumerate(vocab)}
 idx_to_word = { i: w for i, w in enumerate(vocab)}
-print(word_to_idx['good']) # 16 (may change)
-print(idx_to_word[0]) # 'sad' (may change)
+# print(word_to_idx['good']) # 16 (may change)
+# print(idx_to_word[0]) # 'sad' (may change)
 
 # Init the RNN
 rnn = RNN(vocab_size, 2)
@@ -156,4 +157,17 @@ for epoch in range(1000):
         print('Train:\tLoss %.3f | Accuracy: %.3f' % (train_loss, train_acc))
 
         test_loss, test_acc = processData(test_data, backprop=False)
-        print('Train:\tLoss %.3f | Accuracy: %.3f' % (test_loss, test_acc))
+        print('Test:\tLoss %.3f | Accuracy: %.3f' % (test_loss, test_acc))
+
+# Allow user sentences -- Addition wholly by Jake Martin
+running = True
+while running:
+    sentence = createInputs(input("\nTry a sentence: "))
+    output, _ = rnn.forward(sentence)
+    probs = softmax(output)
+    print("Prob Good: ", round(probs[1][0]*100,2), "%" )
+    print("Prob Bad: ", round(probs[0][0]*100,2), "%" )
+
+    cont = input("Run again? (y/n): ")
+    if cont == 'n':
+        running = False
