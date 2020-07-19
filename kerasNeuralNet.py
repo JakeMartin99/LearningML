@@ -24,10 +24,12 @@ test_images = test_images.reshape((-1,784))
 # Build the model
 model = Sequential([
     # Layers...
-    Dense(256, activation='relu', input_shape=(784,)),
+    Dense(512, activation='relu', input_shape=(784,)),
     Dropout(0.05),
-    Dense(128, activation='sigmoid'),
+    Dense(256, activation='sigmoid'),
     Dropout(0.15),
+    Dense(128, activation='relu'),
+    Dropout(0.2),
     Dense(64, activation='relu'),
     Dropout(0.15),
     Dense(32, activation='sigmoid'),
@@ -48,7 +50,7 @@ model.fit(
     train_images, # Training data
     to_categorical(train_labels), # Training targets
     epochs=10,
-    batch_size=64,
+    batch_size=32,
     validation_data=(test_images, to_categorical(test_labels))
 )
 
