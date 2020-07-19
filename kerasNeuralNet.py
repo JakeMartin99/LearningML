@@ -4,8 +4,9 @@ import numpy as np
 import mnist
 import keras
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.utils import to_categorical
+from keras.optimizers import Adam
 
 train_images = mnist.train_images()
 train_labels = mnist.train_labels()
@@ -23,14 +24,20 @@ test_images = test_images.reshape((-1,784))
 # Build the model
 model = Sequential([
     # Layers...
-    Dense(64, activation='relu', input_shape=(784,)),
+    Dense(256, activation='relu', input_shape=(784,)),
+    Dropout(0.05),
+    Dense(128, activation='sigmoid'),
+    Dropout(0.15),
     Dense(64, activation='relu'),
-    Dense(10, activation='softmax')
+    Dropout(0.15),
+    Dense(32, activation='sigmoid'),
+    Dropout(0.05),
+    Dense(10, activation='softmax'),
 ])
 
 # Compile the model
 model.compile(
-    optimizer='adam',
+    optimizer=Adam(lr=0.001), # Default is 'adam'
     loss='categorical_crossentropy',
     metrics=['accuracy'],
 )
@@ -40,8 +47,9 @@ print("\nTraining model:")
 model.fit(
     train_images, # Training data
     to_categorical(train_labels), # Training targets
-    epochs=5,
-    batch_size=32,
+    epochs=10,
+    batch_size=64,
+    validation_data=(test_images, to_categorical(test_labels))
 )
 
 # Test the model
