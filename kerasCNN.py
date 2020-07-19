@@ -4,7 +4,7 @@ import numpy as np
 import mnist
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.utils import to_categorical
 
 train_images = mnist.train_images()
@@ -27,8 +27,11 @@ pool_size = 2
 model = Sequential([
     # Layers...
     Conv2D(num_filters, filter_size, input_shape=(28,28,1)),
+    Conv2D(num_filters, filter_size),
     MaxPooling2D(pool_size=pool_size),
+    Dropout(0.5),
     Flatten(),
+    Dense(64, activation='relu'),
     Dense(10, activation='softmax'),
 ])
 
@@ -44,14 +47,14 @@ print("\nTraining model:")
 model.fit(
     train_images,
     to_categorical(train_labels),
-    epochs=3,
+    epochs=12,
     validation_data=(test_images, to_categorical(test_labels)),
 )
 
 # Save weights
 model.save_weights('cnn.h5')
 # Load the model from disk later using:
-# model.load_weights('model.h5')
+# model.load_weights('cnn.h5')
 
 # Predict on the first 5 test images
 print("\nPrediction:")
