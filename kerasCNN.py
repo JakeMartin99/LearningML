@@ -1,3 +1,4 @@
+# Sourced from the blog at https://victorzhou.com/blog/keras-cnn-tutorial/
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Don't print verbose info msgs
 import numpy as np

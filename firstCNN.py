@@ -1,3 +1,4 @@
+# Sourced from the blog at https://victorzhou.com/blog/intro-to-cnns-part-1/
 import numpy as np
 import mnist
 
