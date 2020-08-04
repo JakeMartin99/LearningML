@@ -1,4 +1,3 @@
-# Sourced from the blog at https://victorzhou.com/blog/keras-rnn-tutorial/
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Don't print verbose info msgs
 from tensorflow.keras.preprocessing import text_dataset_from_directory
@@ -16,7 +15,6 @@ def prepareData(dir):
     )
 
 train_data = prepareData("./aclImdb/train")
-test_data = prepareData("./aclImdb/test")
 
 # Create sequential NN model, with string input layer
 model = Sequential()
@@ -56,25 +54,12 @@ model.compile(
     metrics=['accuracy'],
 )
 
+# Load model weights
 model.load_weights('rnn')
-# Train the model
-print("\nTraining model:")
-model.fit(train_data, epochs=10, validation_data=test_data)
+while True:
+    for i in range(10):
+        val = model.predict([input("Review: ")])[0][0]
+        print(str(round(val*100,1)) + '% positive')
 
-# Save model weights
-model.save_weights('rnn')
-
-# Load model weights and evaluate on test data
-model.load_weights('rnn')
-model.evaluate(test_data)
-
-
-# Should print a very high score like 0.98.
-print(model.predict([
-  "i loved it! highly recommend it to anyone and everyone looking for a great movie to watch.",
-]))
-
-# Should print a very low score like 0.01.
-print(model.predict([
-  "this was awful! i hated it so much, nobody should watch this. the acting was terrible, the music was terrible, overall it was just bad.",
-]))
+    if input("Again(y/n): ") == 'n':
+        break
