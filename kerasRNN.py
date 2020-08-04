@@ -6,7 +6,7 @@ from tensorflow.strings import regex_replace
 from tensorflow.keras.models import Sequential
 from tensorflow.keras import Input
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
-from tensorflow.keras.layers import Embedding, LSTM, Dense
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
 import numpy
 
 def prepareData(dir):
@@ -39,10 +39,15 @@ model.add(vectorize_layer)
 
 # Convert ints to fixed-len vectors, vocab + 1 for out-of-vocab
 model.add(Embedding(max_tokens+1, 128))
-# Recurrent LSTM layer with 64 size output space
+# Recurrent LSTM layers with n-size output space
+model.add(LSTM(64))
 model.add(LSTM(64))
 # Dense and output Layers
+model.add(Dropout(0.5))
 model.add(Dense(64, activation='relu'))
+model.add(Dropout(0.25))
+model.add(Dense(32, activation='relu'))
+model.add(Dropout(0.25))
 model.add(Dense(1, activation='sigmoid'))
 
 # Compile the model
@@ -54,6 +59,22 @@ model.compile(
 
 # Train the model
 print("\nTraining model:")
-model.fit(train_data, epochs=10)
+model.fit(train_data, epochs=10, validation_data=test_data)
 
-model.save_weights('rnn.h5')
+# Save model weights
+model.save_weights('rnn')
+
+# Load model weights and evaluate on test data
+model.load_weights('rnn')
+model.evaluate(test_data)
+
+
+# Should print a very high score like 0.98.
+print(model.predict([
+  "i loved it! highly recommend it to anyone and everyone looking for a great movie to watch.",
+]))
+
+# Should print a very low score like 0.01.
+print(model.predict([
+  "this was awful! i hated it so much, nobody should watch this. the acting was terrible, the music was terrible, overall it was just bad.",
+]))
